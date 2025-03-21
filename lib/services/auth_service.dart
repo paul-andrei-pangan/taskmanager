@@ -4,32 +4,31 @@ import 'package:flutter/material.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Login
-  Future<User?> signInWithEmail(String email, String password) async {
+  Future<bool> login(String email, String password) async {
     try {
-      UserCredential userCredential =
       await _auth.signInWithEmailAndPassword(email: email, password: password);
-      return userCredential.user;
+      return true; // Success
     } catch (e) {
       debugPrint("Login Error: $e");
-      return null;
+      return false; // Failed
     }
   }
 
-  // Register
-  Future<User?> signUpWithEmail(String email, String password) async {
+  Future<bool> register(String email, String password) async {
     try {
-      UserCredential userCredential =
       await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      return userCredential.user;
+      return true; // Success
     } catch (e) {
       debugPrint("Registration Error: $e");
-      return null;
+      return false; // Failed
     }
   }
 
-  // Logout
-  Future<void> signOut() async {
-    await _auth.signOut();
+  Future<void> logout() async {
+    try {
+      await _auth.signOut();
+    } catch (e) {
+      debugPrint("Logout Error: $e");
+    }
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import 'home_screen.dart';
+import 'package:taskmanager/screens/home_screen.dart';
+import 'package:taskmanager/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
@@ -14,27 +14,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
-  void _register() async {
-    final currentContext = context;
+  void register() async {
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        const SnackBar(content: Text("Please enter email and password")),
-      );
-      return;
-    }
+    final success = await _authService.register(email, password);
 
-    var user = await _authService.signUpWithEmail(email, password);
-    if (user != null && mounted) {
+    if (!mounted) return;
+
+    if (success) {
       Navigator.pushReplacement(
-        currentContext,
+        context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      ScaffoldMessenger.of(currentContext).showSnackBar(
-        const SnackBar(content: Text("Registration failed")),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Registration failed. Try again.")),
       );
     }
   }
@@ -50,7 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextField(controller: emailController, decoration: const InputDecoration(labelText: "Email")),
             TextField(controller: passwordController, decoration: const InputDecoration(labelText: "Password"), obscureText: true),
             const SizedBox(height: 20),
-            ElevatedButton(onPressed: _register, child: const Text("Register")),
+            ElevatedButton(onPressed: register, child: const Text("Register")),
           ],
         ),
       ),
