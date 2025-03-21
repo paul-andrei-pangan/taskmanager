@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'login_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   void _logout(BuildContext context) async {
-    await AuthService().logout();
+    await FirebaseAuth.instance.signOut();
+    if (!context.mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -17,15 +18,15 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text("Home"),
         actions: [
           IconButton(
-            onPressed: () => _logout(context),
             icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context),
           ),
         ],
       ),
-      body: const Center(child: Text('Welcome to Task Manager!')),
+      body: const Center(child: Text("Welcome to Task Manager!")),
     );
   }
 }
