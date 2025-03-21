@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import '../services/auth_service.dart';
 import 'home_screen.dart';
 import 'register_screen.dart';
 
@@ -7,32 +7,35 @@ class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  _LoginScreenState createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AuthService _authService = AuthService();
 
   void _login() async {
-    try {
-      await _auth.signInWithEmailAndPassword(
-        email: emailController.text,
-        password: passwordController.text,
+    final currentContext = context;
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(currentContext).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
       );
+      return;
+    }
 
-      if (!context.mounted) return;
-
+    var user = await _authService.signInWithEmail(email, password);
+    if (user != null && mounted) {
       Navigator.pushReplacement(
-        context,
+        currentContext,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
-    } catch (e) {
-      if (!context.mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Login failed: $e")),
+    } else {
+      ScaffoldMessenger.of(currentContext).showSnackBar(
+        const SnackBar(content: Text("Login failed")),
       );
     }
   }
@@ -44,7 +47,6 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(controller: emailController, decoration: const InputDecoration(labelText: "Email")),
             TextField(controller: passwordController, decoration: const InputDecoration(labelText: "Password"), obscureText: true),
